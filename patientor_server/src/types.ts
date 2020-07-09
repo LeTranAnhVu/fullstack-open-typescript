@@ -1,4 +1,3 @@
-
 export interface Diagnose {
     code: string,
     name: string,
@@ -13,3 +12,5 @@ export interface Patient {
     gender: string,
     occupation: string,
 }
+
+export type NonSensitivePatient = Omit<Patient, 'ssn'>
