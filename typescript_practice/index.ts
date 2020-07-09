@@ -6,7 +6,7 @@ const app = express();
 
 app.use(express.json());
 
-app.get('/hello', (req: Request, res: Response) => {
+app.get('/hello', (_req: Request, res: Response) => {
     res.send('Hello Fullstack!');
 });
 
