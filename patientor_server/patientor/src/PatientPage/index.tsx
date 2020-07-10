@@ -6,6 +6,7 @@ import {apiBaseUrl} from "../constants";
 import {useStateValue} from "../state";
 import {Patient, Gender} from "../types";
 import {updatePatient} from "../state/actions";
+import EntryList from "./EntryList";
 
 const iconsByGender: Record<Gender, SemanticICONS> = {
     [Gender.Male]: "man",
@@ -44,6 +45,8 @@ const PatientPage: React.FC = () => {
             <p>{patient.dateOfBirth}</p>
             <p>{patient.ssn}</p>
             <p>{patient.occupation}</p>
+            <h3>Entries:</h3>
+            <EntryList entryList={patient.entries || []}/>
         </div>
     );
 };
