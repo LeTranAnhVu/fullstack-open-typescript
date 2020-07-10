@@ -1,4 +1,4 @@
-import { NewPatient, Gender } from "./types";
+import { NewPatient, Gender, Entry } from "./types";
 
 const errorStr = (name: string, value: any): string => {
     return `Missing or incorrect ${name}: ${value}`;
@@ -53,6 +53,11 @@ const parseGender = (gender: any): Gender => {
     return gender;
 };
 
+
+const parseEntries = (entries: any): Entry[] => {
+    return entries;
+};
+
 export const toNewPatient = (object: any): NewPatient => {
     const newPatient = {
         dateOfBirth: parseDOB(object.dateOfBirth),
@@ -60,6 +65,7 @@ export const toNewPatient = (object: any): NewPatient => {
         ssn: parseSSN(object.ssn),
         occupation: parseOccupation(object.occupation),
         gender: parseGender(object.gender),
+        entries: parseEntries(object.entries),
     };
     return newPatient;
 };

@@ -1,10 +1,10 @@
-import patientsData from '../../data/patients.json'
+import patientsData from "../../data/patients";
 import {v1 as uuid } from 'uuid'
 import {NewPatient, NonSensitivePatient, Patient} from '../types';
 
-const patients: Array<Patient> = patientsData;
+const patients: Patient[] = patientsData;
 
-const getEntries = (): Array<Patient> => {
+const getEntries = (): Patient[] => {
     return patients;
 };
 
@@ -24,6 +24,8 @@ const getNonSensitiveEntries = (): NonSensitivePatient [] => {
         occupation
     }));
 };
+
+
 
 const addEntry = (patient: NewPatient): Patient => {
     const newPatient = {
