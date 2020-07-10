@@ -1,5 +1,5 @@
 import {State} from "./state";
-import {Diagnosis, Patient} from "../types";
+import {Diagnosis, Entry, Patient} from "../types";
 
 export type Action =
     | {
@@ -17,6 +17,12 @@ export type Action =
     | {
     type: "SET_DIAGNOSIS_LIST";
     payload: Diagnosis[];
+} | {
+    type: "ADD_ENTRY";
+    payload: {
+        id: Patient["id"];
+        entry: Entry;
+    };
 };
 
 const assertNever = (arg: never): never => {
@@ -64,6 +70,20 @@ export const reducer = (state: State, action: Action): State => {
                         {}
                     ),
                     ...state.patients,
+                },
+            };
+        case "ADD_ENTRY":
+            return {
+                ...state,
+                patients: {
+                    ...state.patients,
+                    [action.payload.id]: {
+                        ...state.patients[action.payload.id],
+                        entries: [
+                            action.payload.entry,
+                            ...state.patients[action.payload.id].entries,
+                        ],
+                    },
                 },
             };
         default:

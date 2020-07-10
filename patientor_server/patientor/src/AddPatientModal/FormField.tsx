@@ -1,7 +1,12 @@
-import React from "react";
-import { ErrorMessage, Field, FieldProps, FormikProps } from "formik";
-import { Dropdown, DropdownProps, Form } from "semantic-ui-react";
+import React, { useEffect } from "react";
+import axios from 'axios';
+import {ErrorMessage, Field, FieldProps, FormikProps, useField} from "formik";
+import {Dropdown, DropdownProps, Form, Icon} from "semantic-ui-react";
 import { Diagnosis, Gender } from "../types";
+import {useStateValue} from "../state";
+import { apiBaseUrl } from "../constants";
+import { useAsyncCallback } from "react-async-hook";
+import {setDiagnosisList} from "../state/actions";
 
 // structure of a single option
 export type GenderOption = {
@@ -73,42 +78,42 @@ export const NumberField: React.FC<NumberProps> = ({ field, label, min, max }) =
   </Form.Field>
 );
 
-export const DiagnosisSelection = ({
-  diagnoses,
-  setFieldValue,
-  setFieldTouched
-}: {
-  diagnoses: Diagnosis[];
-  setFieldValue: FormikProps<{ diagnosisCodes: string[] }>["setFieldValue"];
-  setFieldTouched: FormikProps<{ diagnosisCodes: string[] }>["setFieldTouched"];
-}) => {
-  const field = "diagnosisCodes";
-  const onChange = (
-    _event: React.SyntheticEvent<HTMLElement, Event>,
-    data: DropdownProps
-  ) => {
-    setFieldTouched(field, true);
-    setFieldValue(field, data.value);
-  };
+export const DiagnosisSelection: React.FC<{
+    name: string;
+    readOnly?: boolean;
+}> = ({ name, readOnly = false }) => {
+    const [field, meta, helpers] = useField(name);
+    const [{ diagnoses }, dispatch] = useStateValue();
 
-  const stateOptions = diagnoses.map(diagnosis => ({
-    key: diagnosis.code,
-    text: `${diagnosis.name} (${diagnosis.code})`,
-    value: diagnosis.code
-  }));
+    const onChange = (
+        _event: React.SyntheticEvent<HTMLElement, Event>,
+        data: DropdownProps
+    ) => {
+        helpers.setTouched(true);
+        helpers.setValue(data.value);
+    };
 
-  return (
-    <Form.Field>
-      <label>Diagnoses</label>
-      <Dropdown
-        fluid
-        multiple
-        search
-        selection
-        options={stateOptions}
-        onChange={onChange}
-      />
-      <ErrorMessage name={field} />
-    </Form.Field>
-  );
+    const stateOptions = Object.keys(diagnoses).map(code => ({
+        key: code,
+        text: `${diagnoses[code].name} (${code})`,
+        value: code,
+    }));
+
+    return (
+        <Form.Field error={meta.touched && meta.error}>
+            <label>Diagnoses</label>
+            <Dropdown
+                lazyLoad
+                fluid
+                multiple
+                search
+                selection
+                options={stateOptions}
+                onChange={onChange}
+                // onOpen={asyncDiagnosesOnClick.execute}
+                disabled={readOnly}
+                value={field.value}
+            />
+        </Form.Field>
+    );
 };

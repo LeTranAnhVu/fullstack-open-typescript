@@ -2,11 +2,14 @@ import React, {useEffect, useState} from "react";
 import {useParams} from "react-router-dom";
 import {Header, Loader, Icon, SemanticICONS, Label} from "semantic-ui-react";
 import axios from "axios";
+import { useAsyncCallback } from "react-async-hook";
 import {apiBaseUrl} from "../constants";
 import {useStateValue} from "../state";
-import {Patient, Gender} from "../types";
-import {updatePatient} from "../state/actions";
+import {Patient, Gender, NewHospitalEntry, Entry} from "../types";
+import {addEntry, updatePatient} from "../state/actions";
 import EntryList from "./EntryList";
+import AddEventForm from "../components/AddEventForm";
+import { FormikHelpers } from "formik";
 
 const iconsByGender: Record<Gender, SemanticICONS> = {
     [Gender.Male]: "man",
@@ -19,7 +22,30 @@ const PatientPage: React.FC = () => {
     const [fullPatient, setFullPatient] = useState<boolean>(false);
     const {id: patientId} = useParams();
     const patient = patients[patientId];
-
+    const postEvent = async (
+        entry: NewHospitalEntry,
+        formikBag: FormikHelpers<NewHospitalEntry>
+    ) => {
+        formikBag.setStatus({});
+        try {
+            const resp = await axios.post<Entry>(
+                `${apiBaseUrl}/patients/${patientId}/entries`,
+                entry
+            );
+            formikBag.resetForm({
+                status: {
+                    success: true,
+                },
+            });
+            return resp.data;
+        } catch (err) {
+            formikBag.setStatus({
+                error: true,
+            });
+            throw err;
+        }
+    };
+    const asyncAddEvent = useAsyncCallback(postEvent);
     useEffect(() => {
         const fetchPatient = async () => {
             if (!patient?.ssn) {
@@ -34,6 +60,12 @@ const PatientPage: React.FC = () => {
         fetchPatient();
     }, [patientId, dispatch, patient]);
 
+    useEffect(() => {
+        if (asyncAddEvent.result) {
+            dispatch(addEntry(patientId, asyncAddEvent.result));
+        }
+    }, [dispatch, asyncAddEvent.result, patientId]);
+
     if (!fullPatient) {
         return <Loader active>Loading patient...</Loader>;
     }
@@ -47,6 +79,7 @@ const PatientPage: React.FC = () => {
             <p>{patient.occupation}</p>
             <h3>Entries:</h3>
             <EntryList entryList={patient.entries || []}/>
+            <AddEventForm onSubmit={asyncAddEvent.execute}/>
         </div>
     );
 };
