@@ -1,17 +1,19 @@
-import React from "react";
+import React, {useEffect} from "react";
 import axios from "axios";
-import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 import { Button, Divider, Header, Container } from "semantic-ui-react";
+import { BrowserRouter as Router, Route, Link, Switch } from "react-router-dom";
 
-import { apiBaseUrl } from "./constants";
-import { useStateValue } from "./state";
 import { Patient } from "./types";
+import { useStateValue } from "./state";
 
 import PatientListPage from "./PatientListPage";
+import { apiBaseUrl } from "./constants";
+import { setPatientList } from "./state/actions";
+import PatientPage from "./PatientPage";
 
 const App: React.FC = () => {
   const [, dispatch] = useStateValue();
-  React.useEffect(() => {
+  useEffect(() => {
     axios.get<void>(`${apiBaseUrl}/ping`);
 
     const fetchPatientList = async () => {
@@ -19,7 +21,7 @@ const App: React.FC = () => {
         const { data: patientListFromApi } = await axios.get<Patient[]>(
           `${apiBaseUrl}/patients`
         );
-        dispatch({ type: "SET_PATIENT_LIST", payload: patientListFromApi });
+        dispatch(setPatientList(patientListFromApi));
       } catch (e) {
         console.error(e);
       }
@@ -37,7 +39,8 @@ const App: React.FC = () => {
           </Button>
           <Divider hidden />
           <Switch>
-            <Route path="/" render={() => <PatientListPage />} />
+            <Route exact path="/" render={() => <PatientListPage />} />
+            <Route path="/patients/:id" component={PatientPage} />
           </Switch>
         </Container>
       </Router>
